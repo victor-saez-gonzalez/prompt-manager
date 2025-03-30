@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: prompt-manager
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:h2:mem:promptdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+  sql:
+    init:
+      mode: always  # force execution of data.sql and schema.sql
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: true # fail if receive properties no defined in dto
+
+
+info:
+  app:
+    name: Prompt Manager
+    description: Backend REST API for prompt manager
+    version: 1.0.0
+
+management:
+    endpoints:
+        web:
+        exposure:
+            include: "*"
+    endpoint:
+        health:
+        show-details: always
+
+logging:
+  level:
+    org.springframework.jdbc.datasource.init: DEBUG
+    org.springframework.http.converter.json: DEBUG
+    org.springframework.boot.actuate.endpoint.web: DEBUG
+
