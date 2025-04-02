@@ -16,9 +16,14 @@ spring:
       ddl-auto: none
     show-sql: true
 
+#  sql:
+#    init:
+#      mode: always  # force execution of data.sql and schema.sql
   sql:
     init:
-      mode: always  # force execution of data.sql and schema.sql
+      mode: always  # Ejecutar scripts de inicialización
+      schema-locations: classpath:/schema.sql  # Asegúrate de que tengas un schema.sql si es necesario
+      data-locations: classpath:/data.sql  # Ubicación del script data.sql
 
   h2:
     console:

@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,24 +37,24 @@ public class CategoryController {
     private final CategoryService categoryService;
     private final CategoryMapper categoryMapper;
 
-    @Operation(
-            summary = "Get all categories (paginated)",
-            description = "Returns a paginated list of all existing categories.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Paginated list of categories",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = CategoryDTOPage.class)
-                            )
-                    )
-            }
-    )
+@Operation(
+        summary = "Get all categories (paginated)",
+        description = "Returns a paginated list of all existing categories.",
+        responses = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Paginated list of categories",
+                        content = @Content(
+                                mediaType = "application/json",
+                                schema = @Schema(implementation = CategoryDTOPage.class)
+                        )
+                )
+        }
+)
     @GetMapping
-    public ResponseEntity<Page<CategoryDTO>> getAllCategories(  Pageable pageable) {
+    public ResponseEntity<Page<CategoryDTO>> getAllCategories(@ParameterObject Pageable pageable) {
 
-        int MAX_PAGE_SIZE = 50;
+        final int MAX_PAGE_SIZE = 50;
         Pageable safePageable = PageRequest.of(
                 pageable.getPageNumber(),
                 Math.min(pageable.getPageSize(), MAX_PAGE_SIZE),
