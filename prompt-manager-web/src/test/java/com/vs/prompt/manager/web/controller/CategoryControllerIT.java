@@ -15,16 +15,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -153,8 +150,7 @@ class CategoryControllerIT {
 
 
         List<CategoryDTO> categories = content.stream()
-                .map(item -> objectMapper.convertValue(item, CategoryDTO.class))
-                .collect(Collectors.toList());
+                .map(item -> objectMapper.convertValue(item, CategoryDTO.class)).toList();
 
         assertThat(categories).extracting("name").contains("Listable");
     }

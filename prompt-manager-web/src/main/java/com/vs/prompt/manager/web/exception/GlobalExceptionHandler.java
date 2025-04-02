@@ -22,8 +22,8 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleNoSuchElementException(NoSuchElementException ex, WebRequest request) {
         log.warn("Resource not found: {}", ex.getMessage());
 
-        ProblemDetail problem = buildProblem(HttpStatus.NOT_FOUND, "Resource Not Found", ex.getMessage(), request);
-        return problem;
+        return buildProblem(HttpStatus.NOT_FOUND, "Resource Not Found", ex.getMessage(), request);
+
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.toMap(
                         v -> v.getPropertyPath().toString(), // e.g. "createCategory.arg0.name"
                         v -> v.getMessage(),
-                        (msg1, msg2) -> msg1 // en caso de conflicto
+                        (msg1, msg2) -> msg1
                 ));
 
         log.warn("Constraint violation: {}", errors);
@@ -67,8 +67,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGeneric(Exception ex, WebRequest request) {
         log.error("Unhandled exception", ex);
-        ProblemDetail problem = buildProblem(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", ex.getMessage(), request);
-        return problem;
+        return buildProblem(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", ex.getMessage(), request);
+
     }
 
     private ProblemDetail buildProblem(HttpStatus status, String title, String detail, WebRequest request) {

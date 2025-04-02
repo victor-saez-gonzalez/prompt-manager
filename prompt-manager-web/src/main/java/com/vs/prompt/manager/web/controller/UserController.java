@@ -11,19 +11,24 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@Slf4j
+@RequiredArgsConstructor
+@Validated
 @RestController
 @RequestMapping("/api/users")
-@RequiredArgsConstructor
 @Tag(name = "Users", description = "CRUD operations for users")
 public class UserController {
 
@@ -79,7 +84,7 @@ public class UserController {
             }
     )
     @PostMapping
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserCreateDTO userDTO) {
+    public ResponseEntity<UserDTO> createUser(@Valid  @RequestBody UserCreateDTO userDTO) {
         User user = userMapper.toEntity(userDTO);
         User createdUser = userService.create(user);
         UserDTO createdUserDTO = userMapper.toDto(createdUser);
@@ -97,7 +102,7 @@ public class UserController {
             }
     )
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable UUID id, @RequestBody UserCreateDTO userDTO) {
+    public ResponseEntity<UserDTO> updateUser(@PathVariable UUID id, @Valid @RequestBody UserCreateDTO userDTO) {
         User user = userMapper.toEntity(userDTO);
         User updatedUser = userService.update(id, user);
         UserDTO updatedUserDTO = userMapper.toDto(updatedUser);

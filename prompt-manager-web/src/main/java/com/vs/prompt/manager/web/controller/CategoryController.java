@@ -54,7 +54,7 @@ public class CategoryController {
     @GetMapping
     public ResponseEntity<Page<CategoryDTO>> getAllCategories(@ParameterObject Pageable pageable) {
 
-        int MAX_PAGE_SIZE = 50;
+        final int MAX_PAGE_SIZE = 50;
         Pageable safePageable = PageRequest.of(
                 pageable.getPageNumber(),
                 Math.min(pageable.getPageSize(), MAX_PAGE_SIZE),

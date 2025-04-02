@@ -2,27 +2,26 @@ package com.vs.prompt.manager.web.exception;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.FieldError;
-import jakarta.validation.Path;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-public class GlobalExceptionHandlerStandaloneTest {
+class GlobalExceptionHandlerStandaloneTest {
 
     private GlobalExceptionHandler handler;
     private WebRequest webRequest;

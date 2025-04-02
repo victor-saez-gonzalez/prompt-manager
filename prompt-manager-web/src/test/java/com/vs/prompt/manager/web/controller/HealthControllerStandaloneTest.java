@@ -8,7 +8,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-public class HealthControllerStandaloneTest {
+class HealthControllerStandaloneTest {
 
     private final MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new HealthController()).build();
 
