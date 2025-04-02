@@ -32,7 +32,11 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 class CategoryControllerStandaloneTest {
 
@@ -52,14 +56,6 @@ class CategoryControllerStandaloneTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-//    @BeforeEach
-//    void setUp() {
-//        MockitoAnnotations.openMocks(this);
-//        mockMvc = MockMvcBuilders
-//                .standaloneSetup(categoryController)
-//                .setControllerAdvice(new GlobalExceptionHandler())
-//                .build();
-//    }
 
     @BeforeEach
     void setUp() {
@@ -126,7 +122,7 @@ class CategoryControllerStandaloneTest {
         when(categoryMapper.toEntity(any(CategoryCreateDTO.class))).thenReturn(new Category());
 
         mockMvc.perform(
-                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/categories/" + id)
+                        put("/api/categories/" + id)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(updateDto))
                 )
@@ -142,7 +138,7 @@ class CategoryControllerStandaloneTest {
         CategoryCreateDTO invalidDto = new CategoryCreateDTO("", "Has description");
 
         mockMvc.perform(
-                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/categories/" + id)
+                        put("/api/categories/" + id)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(invalidDto))
                 )
@@ -161,7 +157,7 @@ class CategoryControllerStandaloneTest {
                 .thenThrow(new NoSuchElementException("Category not found with id " + id));
 
         mockMvc.perform(
-                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/categories/" + id)
+                        put("/api/categories/" + id)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(updateDto))
                 )
@@ -189,7 +185,7 @@ class CategoryControllerStandaloneTest {
                 .when(categoryService).delete(id);
 
         mockMvc.perform(
-                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete("/api/categories/" + id)
+                        delete("/api/categories/" + id)
                 )
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Resource Not Found"))
@@ -213,7 +209,7 @@ class CategoryControllerStandaloneTest {
         when(categoryMapper.toDto(category)).thenReturn(dto);
 
         mockMvc.perform(
-                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/categories/" + id)
+                        get("/api/categories/" + id)
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
@@ -229,7 +225,7 @@ class CategoryControllerStandaloneTest {
                 .thenThrow(new NoSuchElementException("Category not found"));
 
         mockMvc.perform(
-                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/categories/" + id)
+                        get("/api/categories/" + id)
                 )
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Resource Not Found"))
@@ -250,48 +246,6 @@ class CategoryControllerStandaloneTest {
 
         verify(categoryService).findById(id);
     }
-
-
-
-//    @Test
-//    void shouldReturnListOfCategories() throws Exception {
-//        UUID id1 = UUID.randomUUID();
-//        UUID id2 = UUID.randomUUID();
-//
-//        Category category1 = new Category();
-//        category1.setId(id1);
-//        category1.setName("Category A");
-//        category1.setDescription("Desc A");
-//
-//        Category category2 = new Category();
-//        category2.setId(id2);
-//        category2.setName("Category B");
-//        category2.setDescription("Desc B");
-//
-//        CategoryDTO dto1 = new CategoryDTO();
-//        dto1.setId(id1);
-//        dto1.setName("Category A");
-//        dto1.setDescription("Desc A");
-//
-//        CategoryDTO dto2 = new CategoryDTO();
-//        dto2.setId(id2);
-//        dto2.setName("Category B");
-//        dto2.setDescription("Desc B");
-//
-//        when(categoryService.findAll()).thenReturn(List.of(category1, category2));
-//        when(categoryMapper.toDto(category1)).thenReturn(dto1);
-//        when(categoryMapper.toDto(category2)).thenReturn(dto2);
-//
-//        mockMvc.perform(
-//                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/categories")
-//                )
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.length()").value(2))
-//                .andExpect(jsonPath("$[0].id").value(id1.toString()))
-//                .andExpect(jsonPath("$[0].name").value("Category A"))
-//                .andExpect(jsonPath("$[1].id").value(id2.toString()))
-//                .andExpect(jsonPath("$[1].name").value("Category B"));
-//    }
 
     @Test
     void shouldReturnListOfCategories() throws Exception {
