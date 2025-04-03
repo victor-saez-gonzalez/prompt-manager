@@ -17,10 +17,6 @@ import java.util.UUID;
 @Builder
 public class User {
 
-//    @Id
-//    @GeneratedValue(generator = "uuid2")
-//    @GenericGenerator(name = "uuid2", strategy = "uuid2")
-//    @Column(columnDefinition = "BINARY(16)")
     @Id
     @GeneratedValue
     @Column(columnDefinition = "BINARY(16)")
@@ -39,4 +35,6 @@ public class User {
 
     @Column(name = "provider_id")
     private String providerId;
+
+
 }
