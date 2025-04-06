@@ -49,8 +49,8 @@ class UserControllerStandaloneTest {
     private UserController userController;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final String EXPECTED_EMAIL = "test@example.com";
-    private final String EXPECTED_NAME = "John Doe";
+    private static final String EXPECTED_EMAIL = "test@example.com";
+    private static final String EXPECTED_NAME = "John Doe";
 
     @BeforeEach
     void setUp() {

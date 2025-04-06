@@ -5,7 +5,6 @@ import com.vs.prompt.manager.common.dto.CategoryCreateDTO;
 import com.vs.prompt.manager.common.dto.CategoryDTO;
 import com.vs.prompt.manager.persistence.repository.CategoryRepository;
 import com.vs.prompt.manager.web.config.TestSecurityConfig;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,9 +29,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CategoryControllerIT {
 
     @LocalServerPort
+    @SuppressWarnings("unused")
     private int port;
 
     @Autowired
+    @SuppressWarnings("unused")
     private TestRestTemplate restTemplate;
 
     @Autowired
@@ -116,8 +117,8 @@ class CategoryControllerIT {
 
         // Extract 'content' from response
         List<Map<String, Object>> content = (List<Map<String, Object>>) response.getBody().get("content");
-        assertThat(content).isNotNull();
-        assertThat(content.size()).isGreaterThanOrEqualTo(10); // we have 10 categories in data.sql
+        assertThat(content).hasSizeGreaterThanOrEqualTo(10);// we have 10 categories in data.sql
+
 
         // Optional: verify that known category names exist
         List<CategoryDTO> categories = content.stream()
@@ -184,13 +185,16 @@ class CategoryControllerIT {
 
         List<Map<String, Object>> content = (List<Map<String, Object>>) body.get("content");
         assertThat(content).hasSize(2);
-        assertThat(content.get(0).get("name")).isEqualTo("Alpha");
-        assertThat(content.get(1).get("name")).isEqualTo("Beta");
+        //
+        assertThat(content.get(0)).containsEntry("name", "Alpha");
+        assertThat(content.get(1)).containsEntry("name", "Beta");
 
         // check metadata
-        assertThat(body.get("totalElements")).isEqualTo(3);
-        assertThat(body.get("totalPages")).isEqualTo(2);
-        assertThat(body.get("size")).isEqualTo(2);
+        assertThat(body)
+                .containsEntry("totalElements", 3)
+                .containsEntry("totalPages", 2)
+                .containsEntry("size", 2);
+
     }
 
 
@@ -227,8 +231,10 @@ class CategoryControllerIT {
         assertThat(content).hasSize(50);
 
         // Validate pagination metadata
-        assertThat(body.get("totalElements")).isEqualTo(60);
-        assertThat(body.get("totalPages")).isEqualTo(2); // 60 / 50 = 2 pages
+        assertThat(body)
+                .containsEntry("totalElements", 60)
+                .containsEntry("totalPages", 2); // 60 / 50 = 2 pages
+
     }
 
     @Test
@@ -268,16 +274,20 @@ class CategoryControllerIT {
         // Page 0 => Echo, Delta
         // Page 1 => Charlie, Bravo
         assertThat(content).hasSize(2);
-        assertThat(content.get(0).get("name")).isEqualTo("Charlie");
-        assertThat(content.get(1).get("name")).isEqualTo("Bravo");
+        assertThat(content.get(0)).containsEntry("name", "Charlie");
+        assertThat(content.get(1)).containsEntry("name", "Bravo");
 
         // Validate metadata
-        assertThat(body.get("number")).isEqualTo(1); // current page
-        assertThat(body.get("size")).isEqualTo(2);   // requested size
-        assertThat(body.get("totalElements")).isEqualTo(5);
-        assertThat(body.get("totalPages")).isEqualTo(3);
-        assertThat(body.get("first")).isEqualTo(false);
-        assertThat(body.get("last")).isEqualTo(false);
+
+        assertThat(body)
+                .containsEntry("size", 2)
+                .containsEntry("totalElements", 5)
+                .containsEntry("totalPages", 3)
+                .containsEntry("first", false)
+                .containsEntry("last", false)
+                .containsEntry("number", 1);
+
+
     }
 
     private void postCategory(String name, UUID userId) {

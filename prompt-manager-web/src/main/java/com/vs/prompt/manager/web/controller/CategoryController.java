@@ -94,7 +94,7 @@ public class CategoryController {
             summary = "Create a new category",
             description = "Creates a new category and returns the created entity.",
         responses = {
-        @ApiResponse(responseCode = "200", description = "Category created",
+        @ApiResponse(responseCode = "201", description = "Category created",
                 content = @Content(schema = @Schema(implementation = CategoryDTO.class)))
             }
     )
@@ -114,7 +114,7 @@ public class CategoryController {
         User user = userService.findById(categoryCreateDTO.getUserId());
 
         Category created = categoryService.create(categoryMapper.toEntity(categoryCreateDTO, user));
-        //return ResponseEntity.ok(categoryMapper.toDto(created));
+
         return ResponseEntity.created(URI.create("/categories/" + created.getId()))
                 .body(categoryMapper.toDto(created));
     }
@@ -150,23 +150,6 @@ public class CategoryController {
 
         return ResponseEntity.ok(categoryMapper.toDto(updated));
     }
-
-
-//    @PutMapping("/{id}")
-//    public ResponseEntity<CategoryDTO> updateCategory(
-//            @Parameter(description = "UUID of the category to update", required = true)
-//            @PathVariable UUID id,
-//            @Valid
-//            @RequestBody(
-//                    description = "Updated category data",
-//                    required = true,
-//                    content = @Content(schema = @Schema(implementation = CategoryCreateDTO.class))
-//            )
-//            @org.springframework.web.bind.annotation.RequestBody CategoryCreateDTO categoryDto) {
-//        log.info("Updating category with id {}", id);
-//        Category updated = categoryService.update(id, categoryMapper.toEntity(categoryDto));
-//        return ResponseEntity.ok(categoryMapper.toDto(updated));
-//    }
 
 
 
