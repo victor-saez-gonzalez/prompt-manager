@@ -6,7 +6,6 @@ import com.vs.prompt.manager.common.dto.CategoryDTO;
 import com.vs.prompt.manager.common.mapper.CategoryMapper;
 import com.vs.prompt.manager.model.Category;
 import com.vs.prompt.manager.model.User;
-import com.vs.prompt.manager.persistence.repository.CategoryRepository;
 import com.vs.prompt.manager.service.CategoryService;
 import com.vs.prompt.manager.service.UserService;
 import com.vs.prompt.manager.web.exception.GlobalExceptionHandler;
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -43,9 +43,6 @@ class CategoryControllerStandaloneTest {
     private MockMvc mockMvc;
 
     @Mock
-    private CategoryRepository categoryRepository;
-
-    @Mock
     private CategoryService categoryService;
 
     @Mock
@@ -53,6 +50,9 @@ class CategoryControllerStandaloneTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private Environment environment;
 
     @InjectMocks
     private CategoryController categoryController;
@@ -62,14 +62,17 @@ class CategoryControllerStandaloneTest {
 
     @BeforeEach
     void setUp() {
+
         MockitoAnnotations.openMocks(this);
+
+        when(environment.matchesProfiles("dev")).thenReturn(true);
 
         PageableHandlerMethodArgumentResolver pageableResolver = new PageableHandlerMethodArgumentResolver();
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(categoryController)
                 .setCustomArgumentResolvers(pageableResolver)
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(new GlobalExceptionHandler(environment))
                 .build();
     }
 

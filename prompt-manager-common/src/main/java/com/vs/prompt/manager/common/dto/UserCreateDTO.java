@@ -21,6 +21,11 @@ public class UserCreateDTO {
 
     @NotNull AuthProvider provider;
 
+    /**
+     * Unique identifier of the user provided by the external authentication provider
+     * (e.g., Google, GitHub). Used to associate the user account with the third-party service.
+     * Can be null for users authenticated via LOCAL provider.
+     */
     String providerId;
 
 

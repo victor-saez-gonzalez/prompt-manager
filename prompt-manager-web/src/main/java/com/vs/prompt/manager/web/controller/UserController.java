@@ -85,7 +85,7 @@ public class UserController {
     )
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@Valid  @RequestBody UserCreateDTO userDTO) {
-        // FIXME: It's not validating valid provider
+
         User user = userMapper.toEntity(userDTO);
         User createdUser = userService.create(user);
         UserDTO createdUserDTO = userMapper.toDto(createdUser);
@@ -103,7 +103,7 @@ public class UserController {
     )
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable UUID id, @Valid @RequestBody UserCreateDTO userDTO) {
-        // FIXME: It's not validating valid provider
+
         User user = userMapper.toEntity(userDTO);
         User updatedUser = userService.update(id, user);
         UserDTO updatedUserDTO = userMapper.toDto(updatedUser);
