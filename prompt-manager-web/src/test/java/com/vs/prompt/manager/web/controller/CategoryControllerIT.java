@@ -157,6 +157,7 @@ class CategoryControllerIT {
     @Test
     @Sql(statements = {
             "DELETE FROM category",
+            "DELETE FROM tag",
             "DELETE FROM users",
             "INSERT INTO users (id, email, name, password, provider, provider_id) VALUES " +
                     "('11111111-1111-1111-1111-111111111111', 'john.doe@example.com', 'John Doe', 'hashedpassword', 'LOCAL', 'localid')"
@@ -201,6 +202,7 @@ class CategoryControllerIT {
     @Test
     @Sql(statements = {
             "DELETE FROM category",
+            "DELETE FROM tag",
             "DELETE FROM users",
             "INSERT INTO users (id, email, name, password, provider, provider_id) VALUES " +
                     "('11111111-1111-1111-1111-111111111111', 'john.doe@example.com', 'John Doe', 'hashedpassword', 'LOCAL', 'localid')"
@@ -240,6 +242,7 @@ class CategoryControllerIT {
     @Test
     @Sql(statements = {
             "DELETE FROM category",
+            "DELETE FROM tag",
             "DELETE FROM users",
             "INSERT INTO users (id, email, name, password, provider, provider_id) VALUES " +
                     "('11111111-1111-1111-1111-111111111111', 'john.doe@example.com', 'John Doe', 'hashedpassword', 'LOCAL', 'localid')"

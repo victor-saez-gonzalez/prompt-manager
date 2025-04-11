@@ -11,7 +11,7 @@ INSERT INTO users (id, email, name, password, provider, provider_id) VALUES
 ('99999999-9999-9999-9999-999999999999', 'grace.taylor@example.com', 'Grace Taylor', 'hashedpassword9', 'LOCAL', 'localid9'),
 ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'hannah.moore@example.com', 'Hannah Moore', 'hashedpassword10', 'LOCAL', 'localid10');
 
--- Insert categories (relacionadas con el primer usuario)
+-- Insert categories (related with firth user)
 INSERT INTO category (id, name, description, user_id) VALUES
 ('11111111-1111-1111-1111-000000000001', 'Utilities', 'Tools and helpers', '11111111-1111-1111-1111-111111111111'),
 ('22222222-2222-2222-2222-000000000002', 'Creativity', 'Writing and art prompts', '11111111-1111-1111-1111-111111111111'),
@@ -23,3 +23,18 @@ INSERT INTO category (id, name, description, user_id) VALUES
 ('88888888-8888-8888-8888-000000000008', 'Business', 'Entrepreneurship, startups, and finance', '11111111-1111-1111-1111-111111111111'),
 ('99999999-9999-9999-9999-000000000009', 'Education', 'Learning, courses, and resources', '11111111-1111-1111-1111-111111111111'),
 ('aaaaaaaa-aaaa-aaaa-aaaa-00000000000a', 'Entertainment', 'Movies, games, and hobbies', '11111111-1111-1111-1111-111111111111');
+
+-- Insert tags (related with first user)
+INSERT INTO tag (id, name, description, user_id) VALUES
+('11111111-1111-1111-1111-000000000001', 'Inspiration', 'Motivational quotes and ideas', '11111111-1111-1111-1111-111111111111'),
+('22222222-2222-2222-2222-000000000002', 'Mindfulness', 'Practices for mental clarity', '11111111-1111-1111-1111-111111111111'),
+('33333333-3333-3333-3333-000000000003', 'Creativity Boost', 'Techniques to enhance creativity', '11111111-1111-1111-1111-111111111111'),
+('44444444-4444-4444-4444-000000000004', 'Focus', 'Methods to improve concentration', '11111111-1111-1111-1111-111111111111'),
+('55555555-5555-5555-5555-000000000005', 'Healthy Eating', 'Nutrition tips and recipes', '22222222-2222-2222-2222-222222222222'),
+('66666666-6666-6666-6666-000000000006', 'Fitness Goals', 'Workout plans and challenges', '33333333-3333-3333-3333-333333333333'),
+('77777777-7777-7777-7777-000000000007', 'Travel Tips', 'Advice for travelers and explorers', '44444444-4444-4444-4444-444444444444'),
+('88888888-8888-8888-8888-000000000008', 'Tech Trends', 'Latest in technology and gadgets', '55555555-5555-5555-5555-555555555555'),
+('99999999-9999-9999-9999--000000000009', 'Business Strategies', 'Tips for entrepreneurs and startups', '66666666--6666--6666--6666--666666666666'),
+('aaaaaaaa-aaaa-aaaa-aaaa-00000000000a', 'Learning Resources', 'Books, courses, and materials', '77777777-7777-7777-7777-777777777777');
+
+

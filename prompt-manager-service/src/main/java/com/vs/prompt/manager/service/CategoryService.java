@@ -8,7 +8,6 @@ import java.util.UUID;
 
 public interface CategoryService {
 
-
     Page<Category> findAll(Pageable pageable);
 
     Category findById(UUID id);
