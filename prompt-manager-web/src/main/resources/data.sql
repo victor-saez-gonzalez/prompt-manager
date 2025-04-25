@@ -34,7 +34,7 @@ INSERT INTO tag (id, name, description, user_id) VALUES
 ('66666666-6666-6666-6666-000000000006', 'Fitness Goals', 'Workout plans and challenges', '33333333-3333-3333-3333-333333333333'),
 ('77777777-7777-7777-7777-000000000007', 'Travel Tips', 'Advice for travelers and explorers', '44444444-4444-4444-4444-444444444444'),
 ('88888888-8888-8888-8888-000000000008', 'Tech Trends', 'Latest in technology and gadgets', '55555555-5555-5555-5555-555555555555'),
-('99999999-9999-9999-9999--000000000009', 'Business Strategies', 'Tips for entrepreneurs and startups', '66666666--6666--6666--6666--666666666666'),
+('99999999-9999-9999-9999-000000000009', 'Business Strategies', 'Tips for entrepreneurs and startups', '66666666-6666-6666-6666-666666666666'),
 ('aaaaaaaa-aaaa-aaaa-aaaa-00000000000a', 'Learning Resources', 'Books, courses, and materials', '77777777-7777-7777-7777-777777777777');
 
 

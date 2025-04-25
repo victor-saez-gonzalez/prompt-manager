@@ -1,0 +1,23 @@
+# Maven
+**/target/
+.mvn/
+.settings/
+*.log
+
+# IDEs
+.idea/
+*.iml
+*.classpath
+*.project
+.vscode/
+
+# OS
+.DS_Store
+
+# Git
+.git
+.gitignore
+
+# Environment
+.env
+.env.*

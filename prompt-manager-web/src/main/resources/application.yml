@@ -1,39 +1,18 @@
 spring:
   application:
     name: prompt-manager
-  profiles:
-    active: dev
+#  profiles:
+#    active: dev
 
-  datasource:
-    url: jdbc:h2:mem:promptdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: none
-    show-sql: true
-
-#  sql:
-#    init:
-#      mode: always  # force execution of data.sql and schema.sql
   sql:
     init:
-      mode: always  # Ejecutar scripts de inicialización
-      schema-locations: classpath:/schema.sql  # Asegúrate de que tengas un schema.sql si es necesario
-      data-locations: classpath:/data.sql  # Ubicación del script data.sql
-
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+      mode: always # Execute scripts on initialization
+      schema-locations: classpath:/schema.sql
+      data-locations: classpath:/data.sql
 
   jackson:
     serialization:
       fail-on-empty-beans: true # fail if receive properties no defined in dto
-
 
 info:
   app:
@@ -42,17 +21,16 @@ info:
     version: 1.0.0
 
 management:
-    endpoints:
-        web:
-        exposure:
-            include: "*"
-    endpoint:
-        health:
-        show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
 
 logging:
   level:
     org.springframework.jdbc.datasource.init: DEBUG
     org.springframework.http.converter.json: DEBUG
     org.springframework.boot.actuate.endpoint.web: DEBUG
-
