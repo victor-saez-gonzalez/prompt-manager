@@ -3,6 +3,11 @@ spring:
     name: prompt-manager
 #  profiles:
 #    active: dev
+  data:
+    web:
+      page-size: 20 # Default page size for pagination
+      max-page-size: 100 # Maximum page size for pagination
+      default-sort: createdAt,desc # Default sort order for pagination
 
   sql:
     init:
