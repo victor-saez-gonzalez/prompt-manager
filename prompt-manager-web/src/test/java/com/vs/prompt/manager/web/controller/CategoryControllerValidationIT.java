@@ -76,7 +76,10 @@ class CategoryControllerValidationIT {
     @Test
     void shouldFailUpdateWithInvalidName() {
         // Arrange
-        CategoryCreateDTO valid = new CategoryCreateDTO("Valid Name", "Valid description");
+
+        UUID userId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        CategoryCreateDTO valid = new CategoryCreateDTO("Valid Name", "Valid description", userId);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<CategoryCreateDTO> request = new HttpEntity<>(valid, headers);
@@ -86,7 +89,7 @@ class CategoryControllerValidationIT {
         UUID id = postResponse.getBody().getId();
 
         // create invalid category
-        CategoryCreateDTO invalid = new CategoryCreateDTO("", "Still has description");
+        CategoryCreateDTO invalid = new CategoryCreateDTO("", "Still has description", userId);
         HttpEntity<CategoryCreateDTO> badRequest = new HttpEntity<>(invalid, headers);
 
         // Act - PUT
@@ -102,6 +105,4 @@ class CategoryControllerValidationIT {
         assertThat(putResponse.getBody()).isNotNull();
         assertThat(putResponse.getBody().getProperties()).containsKey("errors");
     }
-
-
 }

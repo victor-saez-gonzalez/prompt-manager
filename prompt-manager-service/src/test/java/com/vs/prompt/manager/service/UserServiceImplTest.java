@@ -3,7 +3,6 @@ package com.vs.prompt.manager.service;
 import com.vs.prompt.manager.model.User;
 import com.vs.prompt.manager.model.enums.AuthProvider;
 import com.vs.prompt.manager.persistence.repository.UserRepository;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,18 +14,18 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.*;
-import java.util.UUID;
-
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceImplTest {
+class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
@@ -36,11 +35,11 @@ public class UserServiceImplTest {
 
     private User user;
 
-    private final UUID EXPECTED_UUID = UUID.randomUUID();
-    private final String EXPECTED_EMAIL = "test@example.com";
-    private final String EXPECTED_NAME = "Test User";
-    private final AuthProvider EXPECTED_PROVIDER = AuthProvider.LOCAL;
-    private final String EXPECTED_PASSWORD = "password";
+    private static final UUID EXPECTED_UUID = UUID.randomUUID();
+    private static  final String EXPECTED_EMAIL = "test@example.com";
+    private static final String EXPECTED_NAME = "Test User";
+    private static final AuthProvider EXPECTED_PROVIDER = AuthProvider.LOCAL;
+    private static final String EXPECTED_PASSWORD = "password";
 
     @BeforeEach
     void setUp(){

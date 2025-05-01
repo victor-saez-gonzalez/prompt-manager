@@ -7,16 +7,17 @@ import lombok.*;
 
 import java.util.UUID;
 
-/**
- * Represents a category to which prompts can belong.
+/*
+ * Represents a tag that can be associated with prompts.
  */
+
 @Getter
 @Setter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Category {
+public class Tag {
 
     @Id
     @GeneratedValue
@@ -32,6 +33,4 @@ public class Category {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-
 }

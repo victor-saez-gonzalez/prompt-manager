@@ -6,7 +6,6 @@ import com.vs.prompt.manager.common.dto.UserDTO;
 import com.vs.prompt.manager.common.mapper.UserMapper;
 import com.vs.prompt.manager.model.User;
 import com.vs.prompt.manager.model.enums.AuthProvider;
-import com.vs.prompt.manager.persistence.repository.UserRepository;
 import com.vs.prompt.manager.service.UserService;
 import com.vs.prompt.manager.web.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -39,29 +39,33 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerStandaloneTest {
 
     private MockMvc mockMvc;
-    @Mock
-    private UserRepository userRepository;
+
     @Mock
     private UserService userService;
     @Mock
     private UserMapper userMapper;
+
+    @Mock
+    private Environment environment;
     @InjectMocks
     private UserController userController;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final String EXPECTED_EMAIL = "test@example.com";
-    private final String EXPECTED_NAME = "John Doe";
+    private static final String EXPECTED_EMAIL = "test@example.com";
+    private static final String EXPECTED_NAME = "John Doe";
 
     @BeforeEach
     void setUp() {
+
         MockitoAnnotations.openMocks(this);
+        when(environment.matchesProfiles("dev")).thenReturn(true);
 
         PageableHandlerMethodArgumentResolver pageableResolver = new PageableHandlerMethodArgumentResolver();
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(userController)
                 .setCustomArgumentResolvers(pageableResolver)
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(new GlobalExceptionHandler(environment))
                 .build();
     }
 

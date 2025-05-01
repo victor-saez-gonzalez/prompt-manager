@@ -4,7 +4,6 @@ package com.vs.prompt.manager.model;
 import com.vs.prompt.manager.model.enums.AuthProvider;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 
 
 import java.util.UUID;
@@ -19,9 +18,7 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Column(columnDefinition = "BINARY(16)")
+    @GeneratedValue
     private UUID id;
 
     @Column(nullable = false, unique = true)
@@ -37,4 +34,6 @@ public class User {
 
     @Column(name = "provider_id")
     private String providerId;
+
+
 }

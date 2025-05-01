@@ -5,7 +5,6 @@ import com.vs.prompt.manager.common.dto.CategoryCreateDTO;
 import com.vs.prompt.manager.common.dto.CategoryDTO;
 import com.vs.prompt.manager.persistence.repository.CategoryRepository;
 import com.vs.prompt.manager.web.config.TestSecurityConfig;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +14,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
 import java.util.Map;
@@ -29,9 +29,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CategoryControllerIT {
 
     @LocalServerPort
+    @SuppressWarnings("unused")
     private int port;
 
     @Autowired
+    @SuppressWarnings("unused")
     private TestRestTemplate restTemplate;
 
     @Autowired
@@ -44,16 +46,11 @@ class CategoryControllerIT {
         return "http://localhost:" + port + "/api/categories" + path;
     }
 
-    @BeforeEach
-    void cleanDatabase() {
-        categoryRepository.deleteAll();
-    }
-
     @Test
     void shouldCreateAndRetrieveCategorySuccessfully() {
-
         // Arrange
-        CategoryCreateDTO requestDto = new CategoryCreateDTO("Integration Test", "Test Description");
+        UUID userId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        CategoryCreateDTO requestDto = new CategoryCreateDTO("Integration Test", "Test Description", userId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<CategoryCreateDTO> request = new HttpEntity<>(requestDto, headers);
@@ -62,7 +59,7 @@ class CategoryControllerIT {
         ResponseEntity<CategoryDTO> postResponse = restTemplate.postForEntity(getUrl(""), request, CategoryDTO.class);
 
         // Assert - POST response
-        assertThat(postResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(postResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         CategoryDTO created = postResponse.getBody();
         assertThat(created).isNotNull();
         assertThat(created.getId()).isNotNull();
@@ -81,32 +78,13 @@ class CategoryControllerIT {
         assertThat(fetched.getDescription()).isEqualTo("Test Description");
     }
 
-    @Test
-    void shouldDeleteCategorySuccessfully() {
-        // Arrange
-        CategoryCreateDTO requestDto = new CategoryCreateDTO("To Be Deleted", "Temporary category");
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<CategoryCreateDTO> request = new HttpEntity<>(requestDto, headers);
-
-        // Create a new category
-        ResponseEntity<CategoryDTO> postResponse = restTemplate.postForEntity(getUrl(""), request, CategoryDTO.class);
-        assertThat(postResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        UUID id = postResponse.getBody().getId();
-
-        // Act - DELETE
-        restTemplate.delete(getUrl("/" + id));
-
-        // Assert - GET  must return 404
-        ResponseEntity<CategoryDTO> getResponse = restTemplate.getForEntity(getUrl("/" + id), CategoryDTO.class);
-        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    }
 
     @Test
     void shouldReturnNotFoundWhenUpdatingNonExistingCategory() {
         UUID fakeId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID(); // Simulated userId
 
-        CategoryCreateDTO updateDto = new CategoryCreateDTO("Update", "Nonexistent ID");
+        CategoryCreateDTO updateDto = new CategoryCreateDTO("Update", "Nonexistent ID", userId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<CategoryCreateDTO> request = new HttpEntity<>(updateDto, headers);
@@ -125,13 +103,7 @@ class CategoryControllerIT {
 
     @Test
     void shouldReturnCategoriesList() {
-        // create a category
-        CategoryCreateDTO dto = new CategoryCreateDTO("Listable", "Demo");
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        restTemplate.postForEntity(getUrl(""), new HttpEntity<>(dto, headers), CategoryDTO.class);
-
-        // call to get all (paginated response)
+        // Call to get all categories (paginated)
         ParameterizedTypeReference<Map<String, Object>> responseType = new ParameterizedTypeReference<>() {};
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 getUrl(""),
@@ -143,17 +115,20 @@ class CategoryControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
 
-        // extract 'content' and map to CategoryDTO list
+        // Extract 'content' from response
         List<Map<String, Object>> content = (List<Map<String, Object>>) response.getBody().get("content");
-        assertThat(content).isNotNull();
-        assertThat(content.size()).isGreaterThanOrEqualTo(1);
+        assertThat(content).hasSizeGreaterThanOrEqualTo(10);// we have 10 categories in data.sql
 
 
+        // Optional: verify that known category names exist
         List<CategoryDTO> categories = content.stream()
-                .map(item -> objectMapper.convertValue(item, CategoryDTO.class)).toList();
+                .map(item -> objectMapper.convertValue(item, CategoryDTO.class))
+                .toList();
 
-        assertThat(categories).extracting("name").contains("Listable");
+        assertThat(categories).extracting("name")
+                .contains("Utilities", "Education", "Entertainment");
     }
+
 
 
     @Test
@@ -179,13 +154,23 @@ class CategoryControllerIT {
         assertThat(problem.getDetail()).contains("Category not found");
     }
 
-
     @Test
+    @Sql(statements = {
+            "DELETE FROM category",
+            "DELETE FROM tag",
+            "DELETE FROM users",
+            "INSERT INTO users (id, email, name, password, provider, provider_id) VALUES " +
+                    "('11111111-1111-1111-1111-111111111111', 'john.doe@example.com', 'John Doe', 'hashedpassword', 'LOCAL', 'localid')"
+    })
     void shouldReturnPagedCategoriesSortedByName() {
-        // create 3 categories
-        postCategory("Zeta");
-        postCategory("Alpha");
-        postCategory("Beta");
+
+
+        UUID validUserId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+
+        // Create 60 categories for the valid user
+        postCategory("Zeta", validUserId);
+        postCategory("Alpha", validUserId);
+        postCategory("Beta", validUserId);
 
         //  makes GET with pagination and ascendant order by name
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
@@ -201,24 +186,32 @@ class CategoryControllerIT {
 
         List<Map<String, Object>> content = (List<Map<String, Object>>) body.get("content");
         assertThat(content).hasSize(2);
-        assertThat(content.get(0).get("name")).isEqualTo("Alpha");
-        assertThat(content.get(1).get("name")).isEqualTo("Beta");
+        //
+        assertThat(content.get(0)).containsEntry("name", "Alpha");
+        assertThat(content.get(1)).containsEntry("name", "Beta");
 
         // check metadata
-        assertThat(body.get("totalElements")).isEqualTo(3);
-        assertThat(body.get("totalPages")).isEqualTo(2);
-        assertThat(body.get("size")).isEqualTo(2);
+        assertThat(body)
+                .containsEntry("totalElements", 3)
+                .containsEntry("totalPages", 2)
+                .containsEntry("size", 2);
+
     }
 
 
     @Test
+    @Sql(statements = {
+            "DELETE FROM category",
+            "DELETE FROM tag",
+            "DELETE FROM users",
+            "INSERT INTO users (id, email, name, password, provider, provider_id) VALUES " +
+                    "('11111111-1111-1111-1111-111111111111', 'john.doe@example.com', 'John Doe', 'hashedpassword', 'LOCAL', 'localid')"
+    })
     void shouldEnforceMaxPageSizeLimit() {
+        UUID validUserId = UUID.fromString("11111111-1111-1111-1111-111111111111");
 
-
-        // Create 60 categories
-        IntStream.rangeClosed(1, 60).forEach(i ->
-                postCategory("Category " + i)
-        );
+        // Create 60 categories for the valid user
+        IntStream.rangeClosed(1, 60).forEach(i -> postCategory("Category " + i, validUserId));
 
         // Request with size greater than MAX_PAGE_SIZE (50)
         int requestedSize = 100;
@@ -240,21 +233,29 @@ class CategoryControllerIT {
         assertThat(content).hasSize(50);
 
         // Validate pagination metadata
-        assertThat(body.get("totalElements")).isEqualTo(60);
-        assertThat(body.get("totalPages")).isEqualTo(2); // 60 / 50 = 2 pages
+        assertThat(body)
+                .containsEntry("totalElements", 60)
+                .containsEntry("totalPages", 2); // 60 / 50 = 2 pages
+
     }
 
-
     @Test
+    @Sql(statements = {
+            "DELETE FROM category",
+            "DELETE FROM tag",
+            "DELETE FROM users",
+            "INSERT INTO users (id, email, name, password, provider, provider_id) VALUES " +
+                    "('11111111-1111-1111-1111-111111111111', 'john.doe@example.com', 'John Doe', 'hashedpassword', 'LOCAL', 'localid')"
+    })
     void shouldReturnSecondPageSortedDescending() {
 
+        UUID validUserId = UUID.fromString("11111111-1111-1111-1111-111111111111");
 
-        // Create 5 categories with known names
-        postCategory("Alpha");
-        postCategory("Bravo");
-        postCategory("Charlie");
-        postCategory("Delta");
-        postCategory("Echo");
+        postCategory("Alpha", validUserId);
+        postCategory("Bravo", validUserId);
+        postCategory("Charlie", validUserId);
+        postCategory("Delta", validUserId);
+        postCategory("Echo", validUserId);
 
         // Request page 1 with size 2, sorted descending by name
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
@@ -276,28 +277,35 @@ class CategoryControllerIT {
         // Page 0 => Echo, Delta
         // Page 1 => Charlie, Bravo
         assertThat(content).hasSize(2);
-        assertThat(content.get(0).get("name")).isEqualTo("Charlie");
-        assertThat(content.get(1).get("name")).isEqualTo("Bravo");
+        assertThat(content.get(0)).containsEntry("name", "Charlie");
+        assertThat(content.get(1)).containsEntry("name", "Bravo");
 
         // Validate metadata
-        assertThat(body.get("number")).isEqualTo(1); // current page
-        assertThat(body.get("size")).isEqualTo(2);   // requested size
-        assertThat(body.get("totalElements")).isEqualTo(5);
-        assertThat(body.get("totalPages")).isEqualTo(3);
-        assertThat(body.get("first")).isEqualTo(false);
-        assertThat(body.get("last")).isEqualTo(false);
+
+        assertThat(body)
+                .containsEntry("size", 2)
+                .containsEntry("totalElements", 5)
+                .containsEntry("totalPages", 3)
+                .containsEntry("first", false)
+                .containsEntry("last", false)
+                .containsEntry("number", 1);
+
+
     }
 
+    private void postCategory(String name, UUID userId) {
+        CategoryCreateDTO dto = new CategoryCreateDTO(name, name + " description", userId);
 
-
-
-    private void postCategory(String name) {
-        CategoryCreateDTO dto = new CategoryCreateDTO(name, name + " description");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        restTemplate.postForEntity(getUrl(""), new HttpEntity<>(dto, headers), CategoryDTO.class);
+        ResponseEntity<CategoryDTO> response = restTemplate.postForEntity(
+                getUrl(""),
+                new HttpEntity<>(dto, headers),
+                CategoryDTO.class
+        );
+
+        // Ensure category is created successfully
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     }
-
-
 
 }

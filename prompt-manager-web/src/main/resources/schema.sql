@@ -1,18 +1,31 @@
+DROP TABLE IF EXISTS prompt_tags;
+DROP TABLE IF EXISTS prompts;
 DROP TABLE IF EXISTS category;
-
-CREATE TABLE category (
-  id VARCHAR(36) PRIMARY KEY,  -- UUID almacenado como VARCHAR(36)
-  name VARCHAR(255),
-  description VARCHAR(255)
-);
-
+DROP TABLE IF EXISTS tag;
 DROP TABLE IF EXISTS users;
--- Crear la tabla de usuarios (si es que aún no la tienes)
+
+
 CREATE TABLE users (
-  id VARCHAR(36) PRIMARY KEY,  -- UUID almacenado como VARCHAR(36)
+  id UUID PRIMARY KEY,
   email VARCHAR(255) NOT NULL UNIQUE,
   name VARCHAR(255),
-  password VARCHAR(255),  -- Contraseña (asegurarse de almacenar un hash de la contraseña)
-  provider VARCHAR(50) NOT NULL,  -- Proveedor (por ejemplo, 'LOCAL')
+  password VARCHAR(255),
+  provider VARCHAR(50) NOT NULL,
   provider_id VARCHAR(255)
+);
+
+CREATE TABLE category (
+  id UUID PRIMARY KEY,
+  name VARCHAR(255),
+  description VARCHAR(255),
+  user_id UUID NOT NULL,
+  CONSTRAINT fk_category_user FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE tag (
+  id UUID PRIMARY KEY,
+  name VARCHAR(255),
+  description VARCHAR(255),
+  user_id UUID NOT NULL,
+  CONSTRAINT fk_tag_user FOREIGN KEY (user_id) REFERENCES users(id)
 );

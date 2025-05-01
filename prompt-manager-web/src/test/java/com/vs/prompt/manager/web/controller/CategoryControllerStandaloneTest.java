@@ -4,15 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vs.prompt.manager.common.dto.CategoryCreateDTO;
 import com.vs.prompt.manager.common.dto.CategoryDTO;
 import com.vs.prompt.manager.common.mapper.CategoryMapper;
-import com.vs.prompt.manager.web.exception.GlobalExceptionHandler;
 import com.vs.prompt.manager.model.Category;
-import com.vs.prompt.manager.persistence.repository.CategoryRepository;
+import com.vs.prompt.manager.model.User;
 import com.vs.prompt.manager.service.CategoryService;
+import com.vs.prompt.manager.service.UserService;
+import com.vs.prompt.manager.web.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -31,11 +33,9 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 class CategoryControllerStandaloneTest {
@@ -43,13 +43,16 @@ class CategoryControllerStandaloneTest {
     private MockMvc mockMvc;
 
     @Mock
-    private CategoryRepository categoryRepository;
-
-    @Mock
     private CategoryService categoryService;
 
     @Mock
     private CategoryMapper categoryMapper;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private Environment environment;
 
     @InjectMocks
     private CategoryController categoryController;
@@ -59,14 +62,17 @@ class CategoryControllerStandaloneTest {
 
     @BeforeEach
     void setUp() {
+
         MockitoAnnotations.openMocks(this);
+
+        when(environment.matchesProfiles("dev")).thenReturn(true);
 
         PageableHandlerMethodArgumentResolver pageableResolver = new PageableHandlerMethodArgumentResolver();
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(categoryController)
                 .setCustomArgumentResolvers(pageableResolver)
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(new GlobalExceptionHandler(environment))
                 .build();
     }
 
@@ -83,9 +89,11 @@ class CategoryControllerStandaloneTest {
                 .andExpect(jsonPath("$.errors.name").value("Name is mandatory"));
     }
 
+
     @Test
     void shouldCreateCategorySuccessfully() throws Exception {
-        CategoryCreateDTO requestDto = new CategoryCreateDTO("Standalone", "Test");
+        UUID userId = UUID.randomUUID();
+        CategoryCreateDTO requestDto = new CategoryCreateDTO("Standalone", "Test", userId);
         UUID id = UUID.randomUUID();
 
         CategoryDTO responseDto = new CategoryDTO();
@@ -93,50 +101,79 @@ class CategoryControllerStandaloneTest {
         responseDto.setName("Standalone");
         responseDto.setDescription("Test");
 
+        Category mappedEntity = new Category();
+        mappedEntity.setUser(new User()); // Stub user to satisfy mapping
+
         when(categoryService.create(any(Category.class))).thenReturn(new Category());
         when(categoryMapper.toDto(any(Category.class))).thenReturn(responseDto);
-        when(categoryMapper.toEntity(any(CategoryCreateDTO.class))).thenReturn(new Category());
+        when(categoryMapper.toEntity(any(CategoryCreateDTO.class), any(User.class))).thenReturn(mappedEntity);
+        when(userService.findById(userId)).thenReturn(new User());
+
+
+
 
         mockMvc.perform(post("/api/categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andExpect(jsonPath("$.name").value("Standalone"))
                 .andExpect(jsonPath("$.description").value("Test"));
     }
 
-    @Test
-    void shouldUpdateCategorySuccessfully() throws Exception {
-        UUID id = UUID.randomUUID();
+@Test
+void shouldUpdateCategorySuccessfully() throws Exception {
+    UUID id = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
 
-        CategoryCreateDTO updateDto = new CategoryCreateDTO("Updated Name", "Updated Description");
+    // Create DTO with all required fields
+    CategoryCreateDTO updateDto = new CategoryCreateDTO("Updated Name", "Updated Description", userId);
 
-        CategoryDTO updatedResponse = new CategoryDTO();
-        updatedResponse.setId(id);
-        updatedResponse.setName(updateDto.getName());
-        updatedResponse.setDescription(updateDto.getDescription());
+    // Prepare mocked CategoryDTO as response
+    CategoryDTO updatedResponse = new CategoryDTO();
+    updatedResponse.setId(id);
+    updatedResponse.setName(updateDto.getName());
+    updatedResponse.setDescription(updateDto.getDescription());
 
-        when(categoryService.update(any(UUID.class), any(Category.class))).thenReturn(new Category());
-        when(categoryMapper.toDto(any(Category.class))).thenReturn(updatedResponse);
-        when(categoryMapper.toEntity(any(CategoryCreateDTO.class))).thenReturn(new Category());
+    // Prepare mapped entity
+    Category mappedCategory = new Category();
+    mappedCategory.setName(updateDto.getName());
+    mappedCategory.setDescription(updateDto.getDescription());
 
-        mockMvc.perform(
-                        put("/api/categories/" + id)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(updateDto))
-                )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(id.toString()))
-                .andExpect(jsonPath("$.name").value("Updated Name"))
-                .andExpect(jsonPath("$.description").value("Updated Description"));
-    }
+    // Prepare mocked User
+    User mockUser = new User();
+    mockUser.setId(userId);
+
+    // Mock mapper and service behavior
+    when(categoryService.update(eq(id), any(Category.class))).thenReturn(mappedCategory);
+    when(categoryMapper.toDto(any(Category.class))).thenReturn(updatedResponse);
+
+    when(categoryMapper.toEntity(updateDto, mockUser)).thenReturn(mappedCategory);
+    when(userService.findById(userId)).thenReturn(mockUser);
+
+    // Perform request
+    mockMvc.perform(
+                    put("/api/categories/" + id)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(updateDto))
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(id.toString()))
+            .andExpect(jsonPath("$.name").value("Updated Name"))
+            .andExpect(jsonPath("$.description").value("Updated Description"));
+}
+
+
+
     @Test
     void shouldFailUpdateWithInvalidName() throws Exception {
         UUID id = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
 
-        CategoryCreateDTO invalidDto = new CategoryCreateDTO("", "Has description");
+        // Create invalid DTO (empty name, valid userId)
+        CategoryCreateDTO invalidDto = new CategoryCreateDTO("", "Has description", userId);
 
+        // Perform PUT request with invalid name
         mockMvc.perform(
                         put("/api/categories/" + id)
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -150,11 +187,25 @@ class CategoryControllerStandaloneTest {
     @Test
     void shouldReturnNotFoundWhenUpdatingNonExistingCategory() throws Exception {
         UUID id = UUID.randomUUID();
-        CategoryCreateDTO updateDto = new CategoryCreateDTO("Does not exist", "Trying to update non-existent category");
+        UUID userId = UUID.randomUUID();
 
-        when(categoryMapper.toEntity(any(CategoryCreateDTO.class))).thenReturn(new Category());
-        when(categoryService.update(any(UUID.class), any(Category.class)))
+        CategoryCreateDTO updateDto = new CategoryCreateDTO("Does not exist", "Trying to update non-existent category", userId);
+
+        User mockUser = new User();
+        mockUser.setId(userId);
+
+        Category mappedEntity = new Category();
+        mappedEntity.setName(updateDto.getName());
+        mappedEntity.setDescription(updateDto.getDescription());
+        mappedEntity.setUser(mockUser);
+
+
+        when(categoryMapper.toEntity(updateDto, mockUser)).thenReturn(mappedEntity);
+
+        when(categoryService.update(id, mappedEntity))
                 .thenThrow(new NoSuchElementException("Category not found with id " + id));
+
+        when(userService.findById(userId)).thenReturn(mockUser);
 
         mockMvc.perform(
                         put("/api/categories/" + id)
@@ -165,6 +216,9 @@ class CategoryControllerStandaloneTest {
                 .andExpect(jsonPath("$.title").value("Resource Not Found"))
                 .andExpect(jsonPath("$.detail").value("Category not found with id " + id));
     }
+
+
+
 
     @Test
     void shouldDeleteCategorySuccessfully() throws Exception {

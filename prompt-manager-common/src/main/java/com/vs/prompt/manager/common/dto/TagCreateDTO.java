@@ -9,11 +9,10 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class CategoryCreateDTO {
+public class TagCreateDTO {
 
     @NotBlank(message = "Name is mandatory")
     @Size(max = 100, message = "Name cannot exceed 100 characters")
